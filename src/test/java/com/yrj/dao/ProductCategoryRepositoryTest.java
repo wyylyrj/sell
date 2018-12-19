@@ -31,6 +31,16 @@ public class ProductCategoryRepositoryTest {
     }
 
     @Test
+    public void findAll(){
+        List<ProductCategory> all = pcr.findAll();
+        for (ProductCategory pc:all
+             ) {
+            System.out.println(pc.toString());
+
+        }
+    }
+
+    @Test
     @Transactional//事物回滚
     public void saveTest(){
         ProductCategory productCategory = new ProductCategory("女生最爱",5);
