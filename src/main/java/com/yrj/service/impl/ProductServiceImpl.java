@@ -1,8 +1,11 @@
 package com.yrj.service.impl;
 
 import com.yrj.dao.ProductInfoRepository;
+import com.yrj.dto.CartDTO;
 import com.yrj.entity.ProductInfo;
 import com.yrj.enums.ProductStatusEnum;
+import com.yrj.enums.ResultEnum;
+import com.yrj.exception.SellException;
 import com.yrj.service.ProductService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -38,5 +41,27 @@ public class ProductServiceImpl implements ProductService {
     @Override
     public ProductInfo save(ProductInfo productInfo) {
         return repository.save(productInfo);
+    }
+
+    @Override
+    public void increaseStock(List<CartDTO> cartDTOList) {
+
+    }
+
+    @Override
+    public void decreaseStock(List<CartDTO> cartDTOList) {
+        for (CartDTO cartDTO:cartDTOList
+             ) {
+            ProductInfo productInfo = repository.getOne(cartDTO.getProductId());
+            if (productInfo == null){
+                throw new SellException(ResultEnum.PRODUCT_NOT_EXIT);
+            }
+            Integer result = productInfo.getProductStock() - cartDTO.getProductQuantity();
+            if (result < 0){
+                throw new SellException(ResultEnum.PRODUCT_STOCK_ERROR);
+            }
+            productInfo.setProductStock(result);
+            repository.save(productInfo);
+        }
     }
 }
