@@ -1,5 +1,6 @@
 package com.yrj.service.impl;
 
+import com.yrj.convert.OrderMaster2OrderDTOConvert;
 import com.yrj.dao.OrderDetailRepository;
 import com.yrj.dao.OrderMasterRepository;
 import com.yrj.dto.CartDTO;
@@ -14,13 +15,16 @@ import com.yrj.util.KeyUtil;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.CollectionUtils;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 /**
@@ -48,7 +52,7 @@ public class OrderServiceImpl implements OrderService {
             if (productInfo == null){
                 throw new SellException(ResultEnum.PRODUCT_NOT_EXIT);
             }
-            orderAmount = orderDetail.getProductPrice().multiply(new BigDecimal(orderDetail.getProductQuantity())).add(orderAmount);
+            orderAmount = productInfo.getProductPrice().multiply(new BigDecimal(orderDetail.getProductQuantity())).add(orderAmount);
 
             BeanUtils.copyProperties(productInfo,orderDetail);
             orderDetail.setDetailId(KeyUtil.getUniqueKey());
@@ -66,17 +70,33 @@ public class OrderServiceImpl implements OrderService {
                                         new CartDTO(e.getProductId(),e.getProductQuantity())
                                     ).collect(Collectors.toList());
         productService.decreaseStock(cartDTOList);
-        return null;
+
+        return orderDTO;
     }
 
     @Override
     public OrderDTO findOne(String orderId) {
-        return null;
+        Optional<OrderMaster> orderMasterOptional = orderMasterRepository.findById(orderId);
+        OrderMaster orderMaster = orderMasterOptional.get();
+        if (orderMaster == null){
+            throw new SellException(ResultEnum.ORDER_NOT_EXIT);
+        }
+        List<OrderDetail> orderDetailList = orderDetailRepository.findByOrderId(orderId);
+        if (CollectionUtils.isEmpty(orderDetailList)){
+            throw new SellException(ResultEnum.ORDER_DETAIL_NOT_EXIT);
+        }
+        OrderDTO orderDTO = new OrderDTO();
+        BeanUtils.copyProperties(orderMaster,orderDTO);
+        orderDTO.setOrderDetailList(orderDetailList);
+        return orderDTO;
     }
 
     @Override
     public Page<OrderDTO> findList(String buyerOpenid, Pageable pageable) {
-        return null;
+        Page<OrderMaster> orderMasterPage = orderMasterRepository.findByBuyerOpenid(buyerOpenid, pageable);
+        List<OrderDTO> orderDTOList = OrderMaster2OrderDTOConvert.convert(orderMasterPage.getContent());
+        PageImpl<OrderDTO> orderDTOPage = new PageImpl<>(orderDTOList, pageable, orderMasterPage.getTotalElements());
+        return orderDTOPage;
     }
 
     @Override

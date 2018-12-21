@@ -3,6 +3,7 @@ package com.yrj.entity;
 import com.yrj.enums.OrderStatusEnum;
 import com.yrj.enums.PayStatusEnum;
 import lombok.Data;
+import lombok.ToString;
 import org.hibernate.annotations.DynamicInsert;
 import org.hibernate.annotations.DynamicUpdate;
 
