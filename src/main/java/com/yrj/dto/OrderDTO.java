@@ -1,6 +1,8 @@
 package com.yrj.dto;
 
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.yrj.entity.OrderDetail;
+import com.yrj.util.serializer.Date2LongSerializer;
 import lombok.Data;
 
 import java.math.BigDecimal;
@@ -22,7 +24,9 @@ public class OrderDTO {
     private BigDecimal orderAmount;
     private Integer orderStatus;
     private Integer payStatus;
+    @JsonSerialize(using = Date2LongSerializer.class)
     private Date createTime;
+    @JsonSerialize(using = Date2LongSerializer.class)
     private Date updateTime;
     List<OrderDetail> orderDetailList;
 }
