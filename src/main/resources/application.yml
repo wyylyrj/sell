@@ -19,3 +19,7 @@ server:
 #  file: d:/sell/log/sell.log
 #  level:
 #    com.yrj.LoggerTest: debug
+
+wechat:
+  mpAppId: wx67e9875a0e20a3a1
+  mpAppSecret: d543a1ea3f878b198389c40778a190e7
